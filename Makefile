@@ -1,11 +1,13 @@
-#Контроллер, установленный на плате. Может быть другим, например atmega328 
-DEVICE	=	atmega328
+ 
+DEVICE=atmega328p
+CLOCK_T=16000000
+CLOCK_F=8000000
+CLOCK=$(CLOCK_T)
+HFUSE=0xD9
+LFUSE=0xFC
 
-#Тактовая частота 16 МГц 
-CLOCK	=	16000000
-
-#Команда запуска avrdude. Ее нужно скопировать из Arduino IDE.
-AVRDUDE = 	avrdude -v -patmega328p -carduino -PCOM5 -b115200 -D
+ISP=usbasp
+PORT=/dev/usb/ttyUSB0
 
 OBJECTS	=	main.o
 
@@ -22,8 +24,8 @@ all:	main.hex
 .c.s:
 	$(COMPILE) -S $< -o $@
 
-flash:	all
-	$(AVRDUDE) -U flash:w:main.hex:i
+#flash:	all
+#	$(AVRDUDE) -U flash:w:main.hex:i
 
 clean:
 	rm -f main.hex main.elf $(OBJECTS)
@@ -31,9 +33,30 @@ clean:
 main.elf: $(OBJECTS)
 	$(COMPILE) -o main.elf $(OBJECTS)
 
+#main.bin:	$(OBJECTS)
+#	$(COMPILE) -o main.bin $(OBJECTS) -Wl,-Map,main.map
+	
 main.hex: main.elf
 	rm -f main.hex
 	avr-objcopy -j .text -j .data -O ihex main.elf main.hex
 	avr-size --format=avr --mcu=$(DEVICE) main.elf
 
+flash:
+	tools/avrdude -c$(ISP) -p$(DEVICE) -P$(PORT) -U flash:w:main.hex
 
+fuses_final:
+	tools/avrdude -c$(ISP) -p$(DEVICE) -P$(PORT) -u -U hfuse:w:$(HFUSE):m -U lfuse:w:$(LFUSE):m
+	
+fuses_read:
+	tools/avrdude -c$(ISP) -p$(DEVICE) -P$(PORT) -U hfuse:r:hfuse.txt:h -U lfuse:r:lfuse.txt:h
+
+avrdude:
+	tools/avrdude -c$(ISP) -p$(DEVICE) -P$(PORT) -v
+	
+help:
+	@echo "Usage: make                compile all"
+	@echo "       make help           help"
+	@echo "       make avrdude        testind connect"
+	@echo "       make flash          upload in devices"
+	@echo "       make fuses_read     upload in devices"
+	@echo "       make fuses_final    write FUSES Byte (warning! only final devices)"

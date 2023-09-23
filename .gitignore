@@ -1,0 +1,14 @@
+Thumbs.db
+/.metadata
+*.metadata
+*.settings
+/[Dd]ebug
+/.vs
+.vs
+*.launch
+*.elf
+*.o
+*.hex
+*.cproj
+*.atsln
+*.componentinfo.xml
