@@ -1,7 +1,7 @@
 /*
 Author: Antigo
 Mail: Antigo1989@gmail.com
-Date: 24.09.2023
+Date: 25.09.2023
 Version: 1.0
 Timers/Counters for starting functions or periodic measurements.
 Range of work frequency: 245/N Hz - 8/N MHz.
@@ -42,7 +42,7 @@ void timer1Init_freq(uint16_t freq){
 		div = 1;
 		TCCR1B = 0x01;
 	}
-	uint16_t timediv = (F_CPU/(div*freq))-1;
+	uint16_t timediv = (int)(F_CPU/(div*freq))-1;
 	OCR1AH = (timediv>>8);
 	OCR1AL = timediv&0xFF;
 	TCCR1B |= (1<<WGM12);
@@ -53,23 +53,23 @@ void timer1Init_ms(uint16_t time){
 	uint16_t div;
 	TCCR1A = 0x00;
 	TCCR1B = 0x00;
-	if(((F_CPU/1000)*(time/1024))-1 > 1){
+	if(((F_CPU/500)*(time/1024))-1 > 1){
 		div = 1024;
 		TCCR1B = 0x05;
-		}else if(((F_CPU/1000)*(time/256))-1 > 1){
+	}else if(((F_CPU/500)*(time/256))-1 > 1){
 		div = 256;
 		TCCR1B = 0x04;
-		}else if(((F_CPU/1000)*(time/64))-1 > 1){
+	}else if(((F_CPU/500)*(time/64))-1 > 1){
 		div = 64;
 		TCCR1B = 0x03;
-		}else if(((F_CPU/1000)*(time/8))-1 > 1){
+	}else if(((F_CPU/500)*(time/8))-1 > 1){
 		div = 8;
 		TCCR1B = 0x02;
-		}else{
+	}else{
 		div = 1;
 		TCCR1B = 0x01;
 	}
-	uint16_t timediv = (int)((F_CPU/1000)*(time/div))-1;
+	uint16_t timediv = (int)((F_CPU/500)*(time/div))-1;
 	OCR1AH = (timediv>>8);
 	OCR1AL = timediv&0xFF;
 	TCCR1B |= (1<<WGM12);
